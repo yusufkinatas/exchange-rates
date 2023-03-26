@@ -78,5 +78,6 @@ export const getStaticProps: GetStaticProps<{
     props: {
       data: currencyCodes.map((code) => ({ ...json[code], code })),
     },
+    revalidate: 60,
   };
 };
