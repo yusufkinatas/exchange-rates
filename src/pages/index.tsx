@@ -1,6 +1,7 @@
 import { GetStaticProps, NextPage } from "next";
 import { Inter } from "next/font/google";
 import Head from "next/head";
+import { useEffect, useRef, useState } from "react";
 
 const inter = Inter({ subsets: ["latin"], weight: ["500", "700"] });
 
@@ -20,20 +21,42 @@ const currencyCodes: CurrencyCode[] = [
   "CEY",
 ];
 
+const copyToClipboard = (text: string) => {
+  const input = document.createElement("input");
+  input.setAttribute("value", text);
+  document.body.appendChild(input);
+  input.select();
+  document.execCommand("copy");
+  document.body.removeChild(input);
+};
+
 const Card = ({ Buying, code, Type }: CurrencyWithCode) => {
+  const timeoutRef = useRef<NodeJS.Timeout>();
+  const [copied, setCopied] = useState(false);
+
+  useEffect(() => {
+    return () => {
+      clearTimeout(timeoutRef.current);
+    };
+  }, []);
+
   return (
     <div className={"card"} key={code}>
       <span
         style={{ color: Type === "Currency" ? "#85bb65" : "#ffcf40" }}
         className={inter.className}
       >
-        {code}
+        {copied ? "Copied!" : code}
       </span>
       <input
         onClick={(event) => {
-          event.currentTarget.select();
-          event.currentTarget.setSelectionRange(0, 99999);
-          navigator.clipboard.writeText(event.currentTarget.value ?? "agalar");
+          copyToClipboard(event.currentTarget.value);
+          setCopied(true);
+          clearTimeout(timeoutRef.current);
+
+          timeoutRef.current = setTimeout(() => {
+            setCopied(false);
+          }, 1000);
         }}
         className={inter.className}
         value={Buying}
